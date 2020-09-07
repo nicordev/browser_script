@@ -1,7 +1,10 @@
 (function () {
     displayNameList();
 
-    function fetchNames() {
+    /**
+     * Fetch names from the main window
+     */
+    function fetchVisibleNames() {
         const elements = document.querySelectorAll('div[data-self-name]');
         let names = [];
 
@@ -12,6 +15,23 @@
         return names.filter((currentValue, currentIndex, elements) => {
             return currentIndex === elements.indexOf(currentValue);
         }).sort();
+    }
+
+    /**
+     * Fetch names from the name list
+     */
+    function fetchNames() {
+        const nameElements = elements = [...  document.querySelectorAll('div[data-sort-key]')];
+        const names = nameElements.map(fetchName).filter(name => name);
+
+        function fetchName(nameElement) {
+            let attributeValue = nameElement.getAttribute('data-sort-key');
+            let match = attributeValue.match('^(.+) spaces\/[a-zA-Z0-9]+\/devices\/[a-zA-Z0-9\-]+$') || [];
+
+            return match[1] || null;
+        }
+
+        return names.sort();
     }
 
     function displayNameList() {
