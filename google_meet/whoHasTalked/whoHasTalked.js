@@ -1,3 +1,13 @@
+// ==UserScript==
+// @name         Who has talked?
+// @namespace    http://tampermonkey.net/
+// @version      0.1
+// @description  Show a list of attendees to see who has already talked. Click on a name to remove it. Double click on the list to remove the overlay.
+// @author       You
+// @match        https://meet.google.com/*
+// @grant        none
+// ==/UserScript==
+
 (function () {
     displayNameList();
 
@@ -12,26 +22,37 @@
             names.push(element.textContent);
         }
 
-        return names.filter((currentValue, currentIndex, elements) => {
-            return currentIndex === elements.indexOf(currentValue);
-        }).sort();
+        return names
+            .filter((currentValue, currentIndex, elements) => {
+                return currentIndex === elements.indexOf(currentValue);
+            })
+            .sort();
     }
 
     /**
      * Fetch names from the name list
      */
-    function fetchNames() {
-        const nameElements = elements = [...  document.querySelectorAll('div[data-sort-key]')];
-        const names = nameElements.map(fetchName).filter(name => name);
+    function fetchNamesFromUserList() {
+        const nameElements = [
+            ...document.querySelectorAll('div[aria-label]'),
+        ];
+        const names = nameElements.map(fetchName).filter((name) => name);
 
         function fetchName(nameElement) {
-            let attributeValue = nameElement.getAttribute('data-sort-key');
-            let match = attributeValue.match('^(.+) spaces\/[a-zA-Z0-9]+\/devices\/[a-zA-Z0-9\-]+$') || [];
+            let attributeValue = nameElement.getAttribute('aria-label');
+            let match =
+                attributeValue.match(
+                    '^Afficher d\'autres actions pour (.+)$'
+                ) || [];
 
             return match[1] || null;
         }
 
-        return names.sort();
+        return names
+            .filter((currentValue, currentIndex, elements) => {
+                return currentIndex === elements.indexOf(currentValue);
+            })
+            .sort();
     }
 
     function displayNameList() {
@@ -77,7 +98,14 @@
         overlayElement.appendChild(nameListElement);
 
         refreshNameListButtonElement.addEventListener('click', function () {
-            const names = fetchNames();
+            let names = fetchNamesFromUserList();
+
+            if (0 === names.length) {
+                console.log(
+                    'Fetching names from main window. Open user panel to get the full list of participants.'
+                );
+                names = fetchVisibleNames();
+            }
 
             console.log(names.join('\n'));
             refreshNameList(nameListElement, names);
