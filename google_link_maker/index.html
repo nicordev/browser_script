@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Convert Google drive share links</title>
+    <style>
+        .raw-links-wrapper {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 10px;
+        }
+
+        #raw-links {
+            height: 400px;
+        }
+
+        #run-button {
+            height: 30px;
+        }
+
+        .result {
+            margin: 10px;
+        }
+
+        .result-link {
+            padding: 10px 0;
+        }
+
+        .preview {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+        }
+
+        .preview-link {
+            max-height: 300px;
+        }
+        
+        figure {
+            padding: 10px;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <h1>Convert google drive share links</h1>
+
+    <div class="raw-links-wrapper">
+        <textarea name="" id="raw-links" cols="30" rows="10"></textarea>
+        <button id="run-button">Make wonderful links</button>
+    </div>
+
+    <h2>Result</h2>
+
+    <div class="result" id="result"></div>
+
+    <h2>Preview</h2>
+
+    <div class="preview" id="preview"></div>
+
+    <script src="./google_url_maker.js"></script>
+</body>
+</html>
