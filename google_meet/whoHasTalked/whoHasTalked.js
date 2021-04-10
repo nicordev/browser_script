@@ -283,6 +283,9 @@
             this.style.color = 'grey';
             this.style.textDecoration = 'line-through';
         });
+        nameElement.addEventListener('dblclick', function () {
+            this.remove();
+        });
 
         return nameElement;
     }
