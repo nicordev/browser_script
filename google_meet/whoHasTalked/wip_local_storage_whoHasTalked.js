@@ -11,6 +11,57 @@
 (function () {
     displayNameList();
 
+    const STORAGE_LIST_KEY = 'whoHasTalked';
+    const CLASS_HAS_TALKED = 'has-talked';
+    const STATUS_PRESENT = 0;
+    const STATUS_HAS_TALKED = 1;
+
+    function saveList(list) {
+        sessionStorage.setItem(STORAGE_LIST_KEY, list);
+    }
+
+    function getList() {
+        return sessionStorage.getItem(STORAGE_LIST_KEY)
+    }
+
+    function setAttendeeStatus(name, status) {
+        const list = getList();
+
+        for (const attendee in list) {
+            if (name === attendee) {
+                list[attendee] = status
+            }
+        }
+
+        saveList(list);
+
+        return list;
+    }
+
+    function buildList() {
+        const currentNames = fetchNamesFromUserList();
+        const currentList = {};
+        const existingList = getList();
+
+        if (!currentNames) {
+            currentNames = fetchVisibleNames();
+        }
+
+        currentNames.map((name) => {
+            currentList[name] = STATUS_PRESENT;
+        })
+
+        if (existingList) {
+            for (const attendee in existingList) {
+                if (currentList[attendee]) {
+                    currentList[attendee] = existingList[attendee];
+                }
+            }
+        }
+
+        return currentList;
+    }
+
     /**
      * Fetch names from the main window
      */
@@ -55,74 +106,40 @@
             .sort();
     }
 
-    function setDraggableElement(element) {
-        let isDown = false;
-        let offset = [0,0];
-
-        if (!['absolute', 'relative'].includes(element.style.position)) {
-            element.style.position = 'absolute';
-        }
-
-        element.addEventListener('mousedown', function (event) {
-            if (event.button === 0) {
-                isDown=true;
-                offset = [
-                    element.offsetLeft - event.clientX,
-                    element.offsetTop - event.clientY
-                ];
-            }
-        });
-        document.addEventListener('mouseup', function (event) {
-            isDown=false;
-        });
-        document.addEventListener('mousemove', function (event) {
-            event.preventDefault();
-            if (isDown) {
-                element.style.left = (event.clientX + offset[0]) + 'px';
-                element.style.top = (event.clientY + offset[1]) + 'px';
-            }
-        });
-    }
-
-    function createOverlay() {
-        const element = document.createElement('div');
-
-        element.classList.add('whoHasTalkedNameList');
-        element.style.backgroundColor = '#e8eaed';
-        element.style.boxShadow = '0 1px 2px 0 rgba(60,64,67,.30), 0 1px 3px 1px rgba(60,64,67,.15)';
-        element.style.padding = '1em';
-        element.style.top = '4px';
-        element.style.left = '4px';
-        element.style.zIndex = '999';
-        element.style.fontSize = '.85em';
-        element.style.borderRadius = '.85em';
-        element.style.cursor = 'move';
-
-        setDraggableElement(element);
-
-        return element;
-    }
-
-    function createHeader() {
+    function displayNameList() {
+        const overlayElement = document.createElement('div');
         const headerElement = document.createElement('div');
+        const mainElement = document.createElement('span');
         const titleElement = document.createElement('div');
+        const helpElement = document.createElement('div');
+        const refreshNameListButtonElement = document.createElement('button');
+        const buttonsWrapperElement = document.createElement('span');
+        const toggleSizeButtonElement = document.createElement('span');
+        const closeButtonElement = document.createElement('span');
 
+        // Overlay
+        overlayElement.classList.add('whoHasTalkedNameList');
+        overlayElement.style.position = 'absolute';
+        overlayElement.style.backgroundColor = '#e8eaed';
+        overlayElement.style.boxShadow = '0 1px 2px 0 rgba(60,64,67,.30), 0 1px 3px 1px rgba(60,64,67,.15)';
+        overlayElement.style.padding = '1em';
+        overlayElement.style.top = '4px';
+        overlayElement.style.left = '4px';
+        overlayElement.style.zIndex = '999';
+        overlayElement.style.fontSize = '.85em';
+        overlayElement.style.borderRadius = '.85em';
+        overlayElement.style.cursor = 'move';
+
+        setOverlayInteractions(overlayElement);
+
+        // Header
         headerElement.style.paddingRight='4em';
 
         titleElement.textContent = 'Who has talked?';
         titleElement.style.fontSize = '1.5em';
         titleElement.style.padding = '0.5em';
 
-        headerElement.appendChild(titleElement);
-
-        return headerElement;
-    }
-
-    function createWindowButtons() {
-        const buttonsWrapperElement = document.createElement('span');
-        const closeButtonElement = document.createElement('span');
-        const toggleSizeButtonElement = document.createElement('span');
-
+        // Buttons wrapper
         buttonsWrapperElement.style.position= 'absolute';
         buttonsWrapperElement.style.top= '.5em';
         buttonsWrapperElement.style.right='.5em';
@@ -154,29 +171,19 @@
         closeButtonElement.style.width='1.1em';
         closeButtonElement.style.display= 'inline-block';
 
+
         setCloseButtonInteractions(closeButtonElement);
 
-        buttonsWrapperElement.appendChild(toggleSizeButtonElement);
-        buttonsWrapperElement.appendChild(closeButtonElement);
-
-        return buttonsWrapperElement;
-    }
-
-    function createHelpElement() {
-        const helpElement = document.createElement('div');
+        // Main
+        mainElement.classList.add('whoHasTalkedMain');
 
         helpElement.textContent = 'Click on a name to remove it from the list.';
         helpElement.style.fontSize = '0.75em';
         helpElement.style.padding = '0.5em';
         helpElement.style.color = '#3c4043';
 
-        return helpElement;
-    }
-
-    function createRefreshNameListButton() {
-        const refreshNameListButtonElement = document.createElement('button');
-
         refreshNameListButtonElement.textContent = 'Refresh list';
+
         refreshNameListButtonElement.style.border = 'none';
         refreshNameListButtonElement.style.borderRadius = '1em';
         refreshNameListButtonElement.style.padding = '.5em 1em';
@@ -186,34 +193,41 @@
         refreshNameListButtonElement.style.fontWeight = 'bold';
         refreshNameListButtonElement.style.cursor='pointer';
 
-        return refreshNameListButtonElement;
-    }
-
-    function displayNameList() {
-        const overlayElement = createOverlay();
-        const headerElement = createHeader();
-        const windowButtonsElement = createWindowButtons();
-        const helpElement = createHelpElement();
-        const refreshNameListButtonElement = createRefreshNameListButton();
-        const contentElement = document.createElement('span');
-
-        // Main
-        contentElement.classList.add('whoHasTalkedMain');
-
-        headerElement.appendChild(windowButtonsElement);
-        contentElement.appendChild(helpElement);
-        contentElement.appendChild(refreshNameListButtonElement);
+        headerElement.appendChild(titleElement);
+        buttonsWrapperElement.appendChild(toggleSizeButtonElement);
+        buttonsWrapperElement.appendChild(closeButtonElement);
+        headerElement.appendChild(buttonsWrapperElement);
+        mainElement.appendChild(helpElement);
+        mainElement.appendChild(refreshNameListButtonElement);
         overlayElement.appendChild(headerElement);
-        overlayElement.appendChild(contentElement);
+        overlayElement.appendChild(mainElement);
 
         // Name list
         const nameListElement = document.createElement('ul');
         nameListElement.style.paddingInlineStart= '1em';
 
-        contentElement.appendChild(nameListElement);
+        mainElement.appendChild(nameListElement);
 
+        // Refresh name list
         refreshNameListButtonElement.addEventListener('click', function () {
-            let names = fetchNamesFromUserList();
+            const list = buildList();
+            const nameListKey = 'MeetNameList';
+
+            console.log(list);
+
+            let previousNames = localStorage.getItem(nameListKey);
+            let newNames = fetchNamesFromUserList();
+
+            console.log(newNames)
+
+            let names = newNames.concat(previousNames, newNames);
+
+            console.log(names)
+
+            names = names.filter(function (item, index) {
+                return names.indexOf(item) === index;
+            })
+            localStorage.setItem(nameListKey, names);
 
             if (0 === names.length) {
                 console.log(
@@ -227,6 +241,31 @@
         });
 
         document.body.appendChild(overlayElement);
+    }
+
+    function setOverlayInteractions(overlayElement) {
+        var isDown = false;
+        var offset = [0,0];
+
+        overlayElement.addEventListener('mousedown', function (event) {
+            if (event.button === 0) {
+                isDown=true;
+                offset = [
+                    overlayElement.offsetLeft - event.clientX,
+                    overlayElement.offsetTop - event.clientY
+                ];
+            }
+        });
+        document.addEventListener('mouseup', function (event) {
+            isDown=false;
+        });
+        document.addEventListener('mousemove', function (event) {
+            event.preventDefault();
+            if (isDown) {
+                overlayElement.style.left = (event.clientX + offset[0]) + 'px';
+                overlayElement.style.top = (event.clientY + offset[1]) + 'px';
+            }
+        });
     }
 
     function setToggleSizeButtonElementInteractions(toggleSizeButtonElement) {
@@ -254,15 +293,10 @@
         });
     }
 
-    function isNameAlreadyDisplayed(nameListElement, name) {
-        return [...nameListElement].filter(nameElement => (nameElement.textContent === name)).length > 0;
-    }
-
     function refreshNameList(nameListElement, names) {
+        nameListElement.innerHTML = '';
         names.map(function (name) {
-            if (!isNameAlreadyDisplayed(nameListElement.children, name)) {
-                nameListElement.appendChild(createNameElement(name));
-            }
+            nameListElement.appendChild(createNameElement(name));
         });
     }
 
@@ -273,17 +307,23 @@
         nameElement.style.margin = '0.5em';
         nameElement.style.cursor = 'pointer';
         nameElement.addEventListener('click', function () {
-            if (this.classList.contains('has-talked')) {
-                this.classList.remove('has-talked');
-                this.style.color = 'black';
-                this.style.textDecoration = 'none';
-                return;
-            }
-            this.classList.add('has-talked');
-            this.style.color = 'grey';
-            this.style.textDecoration = 'line-through';
+            switchAttendeeStatus(this);
         });
 
         return nameElement;
+    }
+
+    function switchAttendeeStatus(nameElement) {
+        if (nameElement.classList.contains(CLASS_HAS_TALKED)) {
+            nameElement.classList.remove(CLASS_HAS_TALKED);
+            nameElement.style.color = 'black';
+            nameElement.style.textDecoration = 'none';
+            setAttendeeStatus(name, STATUS_PRESENT);
+            return;
+        }
+        nameElement.classList.add(CLASS_HAS_TALKED);
+        nameElement.style.color = 'grey';
+        nameElement.style.textDecoration = 'line-through';
+        setAttendeeStatus(name, STATUS_HAS_TALKED);
     }
 })();

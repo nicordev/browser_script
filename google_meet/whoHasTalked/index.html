@@ -6,28 +6,77 @@
     <title>Who has talked?</title>
 </head>
 <body>
-    <div data-self-name="sarah croche"></div>
-    <div data-self-name="jean tenbien"></div>
-    <div data-self-name="jim nastique"></div>
-    <div data-self-name="jim nastique"></div>
-    <div data-self-name="jean saisrien"></div>
-    <div data-self-name="lenny bards"></div>
-    <div data-self-name="harry zona"></div>
-    <div data-self-name="pat acaisse"></div>
-    <div data-self-name="Vous"></div>
-    <div data-self-name="Vous"></div>
+    <form id="demo-form">
+        <input id="demo-form-input" type="text" placeholder="add a name">
+    </form>
+    <button id="add-some-names">Add some names</button>
+    <div id="google-meet-page">
+        <div data-self-name="sarah croche"></div>
+        <div data-self-name="jean tenbien"></div>
+        <div data-self-name="jim nastique"></div>
+        <div data-self-name="jim nastique"></div>
+        <div data-self-name="jean saisrien"></div>
+        <div data-self-name="lenny bards"></div>
+        <div data-self-name="harry zona"></div>
+        <div data-self-name="pat acaisse"></div>
+        <div data-self-name="Vous"></div>
+        <div data-self-name="Vous"></div>
+    </div>
 
     <script>
+        function setRemoveOnClick(element) {
+            element.addEventListener('click', function (event) {
+                this.remove();
+            });
+        }
+
+        function addName(name) {
+            const googleMeetElement = document.getElementById('google-meet-page');
+            const newNameElement = document.createElement('div');
+
+            newNameElement.textContent = name;
+            newNameElement.setAttribute('data-self-name', name);
+            setRemoveOnClick(newNameElement);
+            googleMeetElement.appendChild(newNameElement);
+        }
+
         (() => {
             function fillNames() {
                 const nameElements = document.querySelectorAll('div[data-self-name]');
 
                 for (let element of nameElements) {
                     element.textContent = element.getAttribute('data-self-name');
+                    setRemoveOnClick(element);
                 }
             }
-            
+
             fillNames();
+        })();
+
+        (() => {
+            const demoForm = document.getElementById('demo-form')
+            const newNameInput = document.getElementById('demo-form-input');
+            const googleMeetElement = document.getElementById('google-meet-page')
+
+            demoForm.addEventListener('submit', function (event) {
+                event.preventDefault();
+                addName(newNameInput.value)
+            });
+        })();
+
+        (() => {
+            const names = [
+                "Jim Nastique",
+                "Pat Acaisse",
+                "Léo Pard",
+                "Maude Toilet",
+                "Paulie Garchi",
+            ];
+            const buttonElement = document.getElementById('add-some-names');
+
+            buttonElement.addEventListener('click', function (event) {
+                names.forEach(name => addName(name))
+            });
         })();
     </script>
     <script src="whoHasTalked.js"></script>
