@@ -254,10 +254,15 @@
         });
     }
 
+    function isNameAlreadyDisplayed(nameListElement, name) {
+        return [...nameListElement].filter(nameElement => (nameElement.textContent === name)).length > 0;
+    }
+
     function refreshNameList(nameListElement, names) {
-        nameListElement.innerHTML = '';
         names.map(function (name) {
-            nameListElement.appendChild(createNameElement(name));
+            if (!isNameAlreadyDisplayed(nameListElement.children, name)) {
+                nameListElement.appendChild(createNameElement(name));
+            }
         });
     }
 
