@@ -11,6 +11,23 @@
 (function () {
     displayNameList();
 
+    addCss(document.body, `.name-list-item:hover {
+        background-color: aquamarine;
+        font-weight: bold;
+    }`);
+
+    function addCss(element, css) {
+        const styleElement = document.createElement('style');
+
+        if (styleElement.styleSheet) {
+            styleElement.styleSheet.cssText = css;
+        } else {
+            styleElement.appendChild(document.createTextNode(css));
+        }
+
+        element.appendChild(styleElement);
+    }
+
     /**
      * Fetch names from the main window
      */
@@ -269,6 +286,7 @@
     function createNameElement(name) {
         const nameElement = document.createElement('li');
 
+        nameElement.classList.add('name-list-item');
         nameElement.textContent = name;
         nameElement.style.margin = '0.5em';
         nameElement.style.cursor = 'pointer';
