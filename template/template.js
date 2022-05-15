@@ -18,12 +18,10 @@
     const CSS_OVERLAY_COMMAND_MINIMIZE = CSS_OVERLAY_COMMAND + '-size';
     const CSS_OVERLAY_COMMAND_CLOSE = CSS_OVERLAY_COMMAND + '-close';
 
-    main();
-
     addCss(document.body, `
 .${CSS_OVERLAY} {
     background-color: #e8eaed;
-    box-shadow: 0 1px 2px 0 rgba(60,64,67,.30), 0 1px 3px 1px rgba(60,64,67,.15)
+    box-shadow: 0 1px 2px 0 rgba(60,64,67,.30), 0 1px 3px 1px rgba(60,64,67,.15);
     padding: 1em;
     top: 4px;
     left: 4px;
@@ -125,7 +123,7 @@
         headerElement.appendChild(windowButtonsElement);
         overlayElement.appendChild(headerElement);
 
-        const contentElement = createContentElement();
+        const contentElement = createContentElement(options.elements ?? []);
         overlayElement.appendChild(contentElement);
 
         return overlayElement;
@@ -174,17 +172,16 @@
 
     function setToggleSizeButtonElementInteractions(minimizeButtonElement) {
         minimizeButtonElement.addEventListener('mouseup', function (event) {
-            var overlayElement = this.closest(`.${CSS_OVERLAY}`);
-            var mainElement = overlayElement.getElementsByClassName(CSS_OVERLAY + '-content')[ 0 ];
+            const overlayElement = this.closest(`.${CSS_OVERLAY}`);
+            const mainElement = overlayElement.getElementsByClassName(CSS_OVERLAY + '-content')[ 0 ];
+
             switch (minimizeButtonElement.textContent) {
                 case '-':
                     mainElement.style.display = 'none';
-                    overlayElement.style.padding = '0';
                     minimizeButtonElement.textContent = '+';
                     break;
                 case '+':
                     mainElement.style.display = 'initial';
-                    overlayElement.style.padding = '1em';
                     minimizeButtonElement.textContent = '-';
                     break;
             }
@@ -197,12 +194,13 @@
         });
     }
 
-    /**
-     * Put the magic here:
-     */
-    function createContentElement() {
+    function createContentElement(contentElements) {
         const contentElement = document.createElement('span');
         contentElement.classList.add(CSS_OVERLAY + '-content');
+
+        contentElements.forEach(element => {
+            contentElement.appendChild(element);
+        });
 
         return contentElement;
     }
@@ -211,4 +209,29 @@
         const overlayElement = createOverlay(options);
         document.body.appendChild(overlayElement);
     }
+
+    /**
+     * Put the magic...
+     */
+    function createMyElements() {
+        // here...
+        const resultElement = document.createElement('div');
+        const actionButtonElement = document.createElement('button');
+        actionButtonElement.textContent = 'ok';
+        actionButtonElement.addEventListener('click', function (event) {
+            // and here...
+            console.log('hello world!');
+            resultElement.textContent = 'hello world!';
+        });
+
+        return [
+            resultElement,
+            actionButtonElement,
+        ]
+    }
+
+    main({
+        title: 'hello world',
+        elements: createMyElements(),
+    });
 })();
