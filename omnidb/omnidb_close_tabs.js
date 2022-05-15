@@ -1,47 +1,56 @@
 (function () {
-  function isElementVisible(element) {
-    return element.offsetWidth > 0 || element.offsetHeight > 0;
-  }
+    'use strict';
 
-  async function waitForElementToShow(element) {
-    while (false === isElementVisible(element)) {
-      console.log('waiting...');
+    function isElementVisible(element) {
+        return element.offsetWidth > 0 || element.offsetHeight > 0;
     }
 
-    return true;
-  }
+    async function waitForElementToShow(element) {
+        while (false === isElementVisible(element)) {
+            console.log('waiting...');
+        }
 
-  async function clickOk() {
-    const okElement = document.body.querySelector('#button_confirm_ok');
-
-    if (await waitForElementToShow(okElement)) {
-      okElement.click();
+        return true;
     }
-  }
 
-  function closeElements(namesToClose) {
-    const crossElements = [ ...document.querySelectorAll('i[title=Close]') ];
+    async function clickOk() {
+        const okElement = document.body.querySelector('#button_confirm_ok');
 
-    crossElements.map((crossElement) => {
-      const namesToClose = [
-        'Query'
-      ];
-      const name = crossElement.parentNode.textContent;
+        if (await waitForElementToShow(okElement)) {
+            okElement.click();
+        }
+    }
 
-      if (false === namesToClose.includes(name)) {
-        return;
-      }
+    function closeElements(namesToClose, namePatternsToClose) {
+        const crossElements = [ ...document.querySelectorAll('i[title=Close]') ];
 
-      const contextElement = crossElement.parentElement.parentElement.parentElement.parentElement.parentElement.parentElement;
+        crossElements.map((crossElement) => {
+            const name = crossElement.parentNode.textContent;
 
-      if (isElementVisible(contextElement)) {
-        crossElement.click();
-        clickOk();
-      }
-    });
-  }
+            if (false === namesToClose.includes(name)) {
+                const matchingPatterns = namePatternsToClose.filter(pattern => pattern.test(name));
+                console.log({name, length: matchingPatterns.length});
 
-  closeElements([
-    'Query'
-  ]);
-})()
+                if (matchingPatterns.length === 0) {
+                    return;
+                }
+            }
+
+            const contextElement = crossElement.parentElement.parentElement.parentElement.parentElement.parentElement.parentElement;
+
+            if (isElementVisible(contextElement)) {
+                crossElement.click();
+                clickOk();
+            }
+        });
+    }
+
+    closeElements(
+        [
+            'Query',
+        ],
+        [
+            /public./,
+        ]
+    );
+})();
