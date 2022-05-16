@@ -205,6 +205,10 @@
         return contentElement;
     }
 
+    function closeOverlay() {
+        document.body.querySelector(`.${CSS_OVERLAY}`).remove();
+    }
+
     function main(options) {
         const overlayElement = createOverlay(options);
         document.body.appendChild(overlayElement);

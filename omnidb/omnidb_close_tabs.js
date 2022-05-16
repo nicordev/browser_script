@@ -21,15 +21,16 @@
         }
     }
 
-    function closeElements(namesToClose, namePatternsToClose) {
+    function closeElements(options) {
+        const { tabNames, tabNamePatterns } = options;
         const crossElements = [ ...document.querySelectorAll('i[title=Close]') ];
 
         crossElements.map((crossElement) => {
-            const name = crossElement.parentNode.textContent;
+            const tabName = crossElement.parentNode.textContent;
 
-            if (false === namesToClose.includes(name)) {
-                const matchingPatterns = namePatternsToClose.filter(pattern => pattern.test(name));
-                console.log({name, length: matchingPatterns.length});
+            if (false === tabNames.includes(tabName)) {
+                const matchingPatterns = tabNamePatterns.filter(pattern => pattern.test(tabName));
+                console.log({ tabName, length: matchingPatterns.length });
 
                 if (matchingPatterns.length === 0) {
                     return;
@@ -228,6 +229,10 @@
         });
     }
 
+    function closeOverlay() {
+        document.body.querySelector(`.${CSS_OVERLAY}`).remove();
+    }
+
     function setCloseButtonInteractions(closeButtonElement) {
         closeButtonElement.addEventListener('mouseup', function (event) {
             this.closest(`.${CSS_OVERLAY}`).remove();
@@ -250,20 +255,14 @@
         document.body.appendChild(overlayElement);
     }
 
-    function createMyElements() {
+    function createMyElements(options) {
         const elements = [];
 
         const clearTabButtonElement = document.createElement('button');
         clearTabButtonElement.textContent = 'close tabs';
         clearTabButtonElement.addEventListener('click', function (event) {
-            closeElements(
-                [
-                    'Query',
-                ],
-                [
-                    /public./,
-                ]
-            );
+            closeElements(options);
+            closeOverlay();
         });
 
         elements.push(clearTabButtonElement);
@@ -273,6 +272,13 @@
 
     main({
         title: 'close tabs',
-        elements: createMyElements(),
+        elements: createMyElements({
+            tabNames: [
+                'Query',
+            ],
+            tabNamePatterns: [
+                /public./,
+            ],
+        }),
     });
 })();
