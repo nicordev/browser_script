@@ -1,14 +1,3 @@
-// ==UserScript==
-// @name         My awesome script
-// @namespace    http://tampermonkey.net/
-// @version      0.1
-// @description  heaven on earth
-// @author       Me
-// @match        https://whatever-we-want.com/*
-// @icon         https://upload.wikimedia.org/wikipedia/commons/c/c4/Flower_of_Life_SVG.svg
-// @grant        none
-// ==/UserScript==
-
 (function () {
     'use strict';
 
@@ -237,24 +226,14 @@
     // my custom css code here...
     // `);
 
-    /**
-     * Create elements that will be in the overlay
-     */
-    function createMyElements() {
-        const resultElement = document.createElement('div');
-        const actionButtonElement = createButtonElement(function (event) {
-            console.log('hello world!');
-            resultElement.textContent = 'hello world!';
-        })
-
-        return [
-            resultElement,
-            actionButtonElement,
-        ]
+    function downloadAmd64Version() {
+        [ ...document.querySelectorAll('a > span') ].filter(element => element.textContent.match(/amd64.deb$/))[ 0 ].click();
     }
 
     main({
-        title: 'hello world',
-        elements: createMyElements(),
+        title: 'download amd64',
+        elements: [
+            createButtonElement(downloadAmd64Version),
+        ],
     });
 })();
