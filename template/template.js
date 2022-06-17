@@ -115,8 +115,16 @@
         document.addEventListener('mousemove', function (event) {
             event.preventDefault();
             if (isDown) {
-                element.style.left = (event.clientX + offset[ 0 ]) + 'px';
-                element.style.top = (event.clientY + offset[ 1 ]) + 'px';
+                const x = (event.clientX + offset[ 0 ])
+                const y = (event.clientY + offset[ 1 ])
+
+                if (x >= 0) {
+                    element.style.left = x + 'px';
+                }
+
+                if (y >= 0) {
+                    element.style.top = y + 'px';
+                }
             }
         });
     }
@@ -241,13 +249,14 @@
      * Create elements that will be in the overlay
      */
     function createMyElements() {
+        const inputElement = document.createElement('textarea');
         const resultElement = document.createElement('div');
         const actionButtonElement = createButtonElement(function (event) {
-            console.log('hello world!');
-            resultElement.textContent = 'hello world!';
+            resultElement.textContent = inputElement.value;
         })
 
         return [
+            inputElement,
             resultElement,
             actionButtonElement,
         ]
