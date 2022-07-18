@@ -1,13 +1,26 @@
 (function () {
-    // fetch code from my API
-    function fetchCode() {
-        return 755885;
+    'use strict';
+
+    function isAppropriateUrl(url) {
+        const urlParameters = new URLSearchParams(window.location.search);
+        const redirectUri = urlParameters.get('redirect_uri');
+
+        return redirectUri.includes(url);
     }
 
-    // fill the input
-    function fillInput(value) {
-        document.querySelector('#idvPin').value = value;
+    function selectAccount(email) {
+        const accountElement = document.body.querySelector(`*[data-email="${email}"]`);
+
+        if (!accountElement) {
+            console.log(`account ${email} not found.`);
+        }
+
+        accountElement.click();
     }
 
-    fillInput(fetchCode());
-})()
+    if (!isAppropriateUrl('myUrlHere')) {
+        return;
+    }
+
+    setTimeout(() => selectAccount("myEmailHere"), 3000);
+})();
